@@ -1,0 +1,11 @@
+prefix=/home/ac7717/Documents/PSI/coed/deps
+exec_prefix=/home/ac7717/Documents/PSI/coed/deps
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: GNU MP
+Description: GNU Multiple Precision Arithmetic Library
+URL: https://gmplib.org
+Version: 6.2.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lgmp
