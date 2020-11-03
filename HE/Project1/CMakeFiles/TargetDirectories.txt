@@ -1,4 +1,0 @@
-/home/ac7717/Documents/coed/coed/HE/Project1/CMakeFiles/edit_cache.dir
-/home/ac7717/Documents/coed/coed/HE/Project1/CMakeFiles/rebuild_cache.dir
-/home/ac7717/Documents/coed/coed/HE/Project1/CMakeFiles/build-time-make-directory.dir
-/home/ac7717/Documents/coed/coed/HE/Project1/CMakeFiles/Project1.dir
