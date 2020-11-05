@@ -76,6 +76,7 @@ int main() {
 
     printf("--------------- Baseline Version (no packing) -------------------\n");
     helib::Ctxt parent_ctxt(*encryptor.getPublicKey());
+    clock_t start = std::clock();
     encryptor.getEncryptedArray()->encrypt(parent_ctxt, *encryptor.getPublicKey(), parentvector);
     // std::vector<helib::Ctxt> child_ctxt_vector();
     for(int i=0; i<childSize; i++){
@@ -92,9 +93,11 @@ int main() {
         
         PSI::inspectResults(childvector[i], intersection, encryptor);
     }
+    clock_t stop = std::clock();
+    double baseline_duration = (double) ((stop - start) / CLOCKS_PER_SEC);
 
     printf("--------------- Optimization 1: Packed -------------------\n");
-
+    start = std::clock();
     printf("Encrypting vectors into Packed CTXT...");
     helib::Ctxt child_ctxt(*encryptor.getPublicKey());
     encryptor.getEncryptedArray()->encrypt(child_ctxt, *encryptor.getPublicKey(), childvector);
@@ -105,6 +108,13 @@ int main() {
     printf("Done\n");
 
     PSI::inspectResultsPacked(childvector, intersection, childSize, encryptor);
+    stop = std::clock();
+    double packed_duration = (double) ((stop - start) / CLOCKS_PER_SEC);
+
+    printf("--------------- Timing Comparison -------------------\n");
+    printf("\tBaseline: %f\n", baseline_duration);
+    printf("\tPacked: %f\n", packed_duration);
+
 
     printf("-------- Program End --------\n");
     return 0;
