@@ -12,7 +12,9 @@
 class PSI {
 public:
 	static helib::Ctxt findIntersection(helib::Ctxt child_ctxt, helib::Ctxt parent_ctxt, int parentSize, COED::Encryptor encryptor);
-	static void inspectResults(std::vector<long> childvector, std::vector<long> parentvector, helib::Ctxt intersection, int childSize, COED::Encryptor encryptor);
+	static helib::Ctxt findIntersectionPacked(helib::Ctxt child_ctxt, helib::Ctxt parent_ctxt, int parentSize, COED::Encryptor encryptor);
+	static void inspectResults(long childvector_i, helib::Ctxt intersection, COED::Encryptor encryptor);
+	static void inspectResultsPacked(std::vector<long> childvector, helib::Ctxt intersection, int childSize, COED::Encryptor encryptor);
 };
 
 
