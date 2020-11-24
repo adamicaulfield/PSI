@@ -81,3 +81,65 @@ void PSI::inspectResultsPacked(std::vector<long> childvector, helib::Ctxt inters
         }
     }
 }
+
+helib::Ctxt PSI::findIntersectionHashingPacked(helib::Ctxt child,
+                                               helib::Ctxt parent,
+                                               COED::Encryptor encryptor,
+                                               unsigned int childLength,
+                                               unsigned int parentLength) {
+    auto finalAnswer = child;
+
+    encryptor.getEncryptedArray()->rotate(parent, childLength);
+
+    auto rotationAmount = fmax(childLength, parentLength);
+
+    for (int i = 0; i < rotationAmount; i++) {
+        auto answer = child;
+
+//        std::vector<long> results(encryptor.getEncryptedArray()->size());
+//        encryptor.getEncryptedArray()->decrypt(child, *encryptor.getSecretKey(), results);
+//        std::cout << "encrypted child:\n ";
+//        for (int j = 0; j < encryptor.getEncryptedArray()->size(); j++) {
+//            std::cout << results[j];
+//        }
+//        std::cout << std::endl;
+//
+//        std::cout << "minus" << std::endl;
+
+        encryptor.getEncryptedArray()->rotate(parent, -1);
+
+//        std::vector<long> results3(encryptor.getEncryptedArray()->size());
+//        encryptor.getEncryptedArray()->decrypt(parent, *encryptor.getSecretKey(), results3);
+//        for (int j = 0; j < encryptor.getEncryptedArray()->size(); j++) {
+//            std::cout << results3[j];
+//        }
+//        std::cout << std::endl;
+
+        answer -= parent;
+
+//        std::cout << "equals" << std::endl;
+//
+//        std::vector<long> results2(encryptor.getEncryptedArray()->size());
+//        encryptor.getEncryptedArray()->decrypt(answer, *encryptor.getSecretKey(), results2);
+//        for (int j = 0; j < encryptor.getEncryptedArray()->size(); j++) {
+//            std::cout << results2[j];
+//        }
+//        std::cout << std::endl;
+
+        finalAnswer.multiplyBy(answer);
+    }
+    return finalAnswer;
+}
+
+void PSI::inspectResultsHashingPacked(helib::Ctxt ctxt, std::vector<long> values, COED::Encryptor encryptor, unsigned long childSlotSize) {
+    std::vector<long> results(encryptor.getEncryptedArray()->size());
+    encryptor.getEncryptedArray()->decrypt(ctxt, *encryptor.getSecretKey(), results);
+    for (int i = 0; i < childSlotSize; i++) {
+        if (results[i] == 0){
+            printf("Value: %ld\t Found: True\n", values[i]);
+        }
+        else{
+            printf("Value: %ld\t Found: False\n", values[i]);
+        }
+    }
+}

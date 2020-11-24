@@ -14,6 +14,10 @@ Based on code from:
 #include <ctime>
 #include <vector>
 
+std::size_t hashVal(long &i);
+
+std::vector<std::vector<long>> hashPtxt(std::vector<long> ptxts, int pSize);
+
 /* 
     Main iterates through all of the Tasks once
     Task 1 requires two user integer inputs
@@ -35,7 +39,7 @@ int main() {
                               numOfColOfKeySwitchingMatrix);
     printf("Finished creating encryptor.\n");
 
-    std::cout << "Program Finished" << std::endl;
+    std::cout << "Encryption context creation finished" << std::endl;
 
     std::vector<long> childvector(encryptor.getEncryptedArray()->size()), parentvector(encryptor.getEncryptedArray()->size());
     long nslots = encryptor.getEncryptedArray()->size();
@@ -73,6 +77,33 @@ int main() {
         printf("%ld ", childvector[i]);
     }
     printf("\n");
+
+    printf("--------------- Hashing (no packing) -------------------\n");
+    auto startTimeHash = std::clock();
+    std::cout << "child table: " << std::endl << std::endl;
+    auto childTable = hashPtxt(childvector, childSize);
+    std::cout << "parent table: " << std::endl;
+    auto parentTable = hashPtxt(parentvector, parentSize);
+
+    for (int i = 0; i < childTable.size(); i++) {
+        auto childSlot = childTable.at(i);
+        auto childSlotSize = childSlot.size();
+        childSlot.resize(encryptor.getEncryptedArray()->size());
+        auto parentSlot = parentTable.at(i);
+        auto parentSlotSize = parentSlot.size();
+        parentSlot.resize(encryptor.getEncryptedArray()->size());
+
+        helib::Ctxt child_ctxt(*encryptor.getPublicKey());
+        encryptor.getEncryptedArray()->encrypt(child_ctxt, *encryptor.getPublicKey(), childSlot);
+        helib::Ctxt parent_ctxt(*encryptor.getPublicKey());
+        encryptor.getEncryptedArray()->encrypt(parent_ctxt, *encryptor.getPublicKey(), parentSlot);
+
+        auto answer = PSI::findIntersectionHashingPacked(child_ctxt, parent_ctxt, encryptor, childSlotSize, parentSlotSize);
+        PSI::inspectResultsHashingPacked(answer, childSlot, encryptor, childSlotSize);
+    }
+
+    auto hashDuration = (std::clock() - startTimeHash) / CLOCKS_PER_SEC;
+    std::cout << "Hashing took " << hashDuration << "seconds " << std::endl;
 
     printf("--------------- Baseline Version (no packing) -------------------\n");
     helib::Ctxt parent_ctxt(*encryptor.getPublicKey());
@@ -118,4 +149,40 @@ int main() {
 
     printf("-------- Program End --------\n");
     return 0;
+}
+
+std::size_t hashVal(long &x) {
+    long y = x;
+    y = ((y >> 16) ^ y) * 0x45d9f3b;
+    y = ((y >> 16) ^ y) * 0x45d9f3b;
+    y = (y >> 16) ^ y;
+    return y;
+}
+
+std::vector<std::vector<long>> hashPtxt(std::vector<long> ptxts, int pSize) {
+    auto hashTableSize = pSize / 2;
+    std::vector<std::vector<long>> hashTable(hashTableSize);
+
+    // insert empty vectors into the slots
+    for (int i = 0; i < hashTableSize; i++) {
+        std::vector<long> toInsert(0);
+        hashTable[i] = toInsert;
+    }
+
+    for (int i = 0; i < pSize; i++) {
+        std::size_t hashedValue = hashVal(ptxts[i]);
+        std::size_t hashMod = hashedValue % hashTableSize;
+        hashTable[hashMod].push_back(ptxts[i]);
+    }
+
+    // print hash table
+    for (int i = 0; i < hashTableSize; i++) {
+        std::cout << "slot " << i << ": ";
+        for (auto j = 0; j < hashTable[i].size(); j++) {
+            std::cout << hashTable[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    return hashTable;
 }

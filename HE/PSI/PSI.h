@@ -15,6 +15,16 @@ public:
 	static helib::Ctxt findIntersectionPacked(helib::Ctxt child_ctxt, helib::Ctxt parent_ctxt, int parentSize, COED::Encryptor encryptor);
 	static void inspectResults(long childvector_i, helib::Ctxt intersection, COED::Encryptor encryptor);
 	static void inspectResultsPacked(std::vector<long> childvector, helib::Ctxt intersection, int childSize, COED::Encryptor encryptor);
+	static helib::Ctxt findIntersectionHashingPacked(helib::Ctxt child,
+                                                     helib::Ctxt parent,
+                                                  COED::Encryptor encryptor,
+                                                  unsigned int childLength,
+                                                  unsigned int parentLength);
+
+    static void inspectResultsHashingPacked(helib::Ctxt ctxt,
+                                            std::vector<long> values,
+                                            COED::Encryptor encryptor,
+                                            unsigned long childSlotSize);
 };
 
 
