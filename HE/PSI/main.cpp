@@ -126,8 +126,8 @@ int main() {
 
     // std::vector<std::vector<int>> combinations = getCombinations(5,3);
     start = std::clock();
-    int n=10;
     std::vector<long> senderSet = {1,3};
+    int n = senderSet.size();
     std::vector<long> senderOptCoeff = getSenderOptCoeffs(n, senderSet);
     printf("\t Sender Optimized Coeff: ");
     for(int i=0; i<=n; i++){
@@ -150,15 +150,15 @@ int main() {
     encryptor.getEncryptedArray()->encrypt(senderOptCoeff_Ctxt, *encryptor.getPublicKey(), optCoeff);
     printf("Done\n");
 
-    int x_n = 10;
     std::vector<long> receiverSet = {1, 2, 3, 4};
+    int x_n = receiverSet.size();
     printf("Setup ReceiverSet\n");
     std::vector<long> receiverDataExpanded(nslots);
     printf("Initialized vector for expanded receiver data\n");
 
     helib::Ctxt receiverDataExp_Ctxt(*encryptor.getPublicKey());
     for(int x = 0; x<x_n; x++){
-        printf("Expanded data for %d: ", x);
+        // printf("Expanded data for %d: ", x);
         for(int i=n; i>=0; i--){
             receiverDataExpanded[n-i] = (long) pow(receiverSet[x],i);
             // printf("Passed for i=%d\n", i);
