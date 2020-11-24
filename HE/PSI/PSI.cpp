@@ -81,3 +81,35 @@ void PSI::inspectResultsPacked(std::vector<long> childvector, helib::Ctxt inters
         }
     }
 }
+
+helib::Ctxt PSI::windowedPSI(helib::Ctxt receiver_ctxt, helib::Ctxt sender_ctxt, int senderSetSize, COED::Encryptor encryptor){
+	helib::Ctxt result(receiver_ctxt);
+	result.multiplyBy(sender_ctxt);
+
+	// std::vector<long> inspect(encryptor.getEncryptedArray()->size());
+	// encryptor.getEncryptedArray()->decrypt(result, *encryptor.getSecretKey(), inspect);
+	// printf("in windowedPSI(): Product of ciphertexts: ");
+	// for(int i=0; i<inspect.size(); i++){
+	// 	printf("%ld ", inspect[i]);
+	// }
+	// printf("\n");
+
+	helib::Ctxt tmp(result);
+	encryptor.getEncryptedArray()->rotate(tmp, -1);
+	result += tmp;
+	
+	for(int i=0; i<senderSetSize-1; i++){
+		
+		// encryptor.getEncryptedArray()->decrypt(result, *encryptor.getSecretKey(), inspect);
+		// printf("in windowedPSI(): After %d rotations/sums: ", i+1);
+		// for(int i=0; i<inspect.size(); i++){
+		// 	printf("%ld ", inspect[i]);
+		// }
+		// printf("\n");
+
+		encryptor.getEncryptedArray()->rotate(tmp, -1);
+		result += tmp;
+	}
+
+	return result;
+}
