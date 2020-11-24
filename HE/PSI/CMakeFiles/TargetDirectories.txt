@@ -1,4 +1,0 @@
-/home/ac7717/Documents/PSI/HE/PSI/CMakeFiles/edit_cache.dir
-/home/ac7717/Documents/PSI/HE/PSI/CMakeFiles/rebuild_cache.dir
-/home/ac7717/Documents/PSI/HE/PSI/CMakeFiles/build-time-make-directory.dir
-/home/ac7717/Documents/PSI/HE/PSI/CMakeFiles/PSI.dir

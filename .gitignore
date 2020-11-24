@@ -1,1 +1,6 @@
 deps/
+HE/PSI/CMakeCache.txt
+HE/PSI/Makefile
+HE/PSI/cmake-build-debug
+HE/PSI/CMakeFiles
+.idea
