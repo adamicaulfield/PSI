@@ -14,9 +14,9 @@ Based on code from:
 #include <ctime>
 #include <vector>
 
-std::size_t hashVal(long &i);
+std::size_t hashVal(long &x);
 
-std::vector<std::vector<long>> hashPtxt(std::vector<long> ptxts, int pSize);
+std::vector<std::vector<long>> hashPtxt(std::vector<long> ptxts, int pSize, size_t hashTableSize);
 
 /* 
     Main iterates through all of the Tasks once
@@ -80,10 +80,11 @@ int main() {
 
     printf("--------------- Hashing (no packing) -------------------\n");
     auto startTimeHash = std::clock();
+    auto hashTableSize = parentSize / 2;
     std::cout << "child table: " << std::endl << std::endl;
-    auto childTable = hashPtxt(childvector, childSize);
-    std::cout << "parent table: " << std::endl;
-    auto parentTable = hashPtxt(parentvector, parentSize);
+    auto childTable = hashPtxt(childvector, childSize, hashTableSize);
+    std::cout << "parent table: " << std::endl << std::endl;
+    auto parentTable = hashPtxt(parentvector, parentSize, hashTableSize);
 
     for (int i = 0; i < childTable.size(); i++) {
         auto childSlot = childTable.at(i);
@@ -93,13 +94,15 @@ int main() {
         auto parentSlotSize = parentSlot.size();
         parentSlot.resize(encryptor.getEncryptedArray()->size());
 
-        helib::Ctxt child_ctxt(*encryptor.getPublicKey());
-        encryptor.getEncryptedArray()->encrypt(child_ctxt, *encryptor.getPublicKey(), childSlot);
-        helib::Ctxt parent_ctxt(*encryptor.getPublicKey());
-        encryptor.getEncryptedArray()->encrypt(parent_ctxt, *encryptor.getPublicKey(), parentSlot);
+        if (parentSlotSize != 0 && childSlotSize != 0) {
+            helib::Ctxt child_ctxt(*encryptor.getPublicKey());
+            encryptor.getEncryptedArray()->encrypt(child_ctxt, *encryptor.getPublicKey(), childSlot);
+            helib::Ctxt parent_ctxt(*encryptor.getPublicKey());
+            encryptor.getEncryptedArray()->encrypt(parent_ctxt, *encryptor.getPublicKey(), parentSlot);
 
-        auto answer = PSI::findIntersectionHashingPacked(child_ctxt, parent_ctxt, encryptor, childSlotSize, parentSlotSize);
-        PSI::inspectResultsHashingPacked(answer, childSlot, encryptor, childSlotSize);
+            auto answer = PSI::findIntersectionHashingPacked(child_ctxt, parent_ctxt, encryptor, childSlotSize, parentSlotSize);
+            PSI::inspectResultsHashingPacked(answer, childSlot, encryptor, childSlotSize);
+        }
     }
 
     auto hashDuration = (std::clock() - startTimeHash) / CLOCKS_PER_SEC;
@@ -159,8 +162,7 @@ std::size_t hashVal(long &x) {
     return y;
 }
 
-std::vector<std::vector<long>> hashPtxt(std::vector<long> ptxts, int pSize) {
-    auto hashTableSize = pSize / 2;
+std::vector<std::vector<long>> hashPtxt(std::vector<long> ptxts, int pSize, size_t hashTableSize) {
     std::vector<std::vector<long>> hashTable(hashTableSize);
 
     // insert empty vectors into the slots
