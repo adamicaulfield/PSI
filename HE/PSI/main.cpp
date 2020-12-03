@@ -17,6 +17,7 @@ Based on code from:
 #include <cmath>
 
 int n_chose_k(int n, int k);
+int n_chose_k_v2(int n, int k);
 std::vector<std::vector<int>> getCombinations(int n, int k, int t);
 void testGetCombinations();
 std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff);
@@ -26,6 +27,11 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff);
     Task 1 requires two user integer inputs
 */
 int main() {
+	printf("%d choose %d = %d \n", 20, 2, n_chose_k(20,18));
+	printf("%d choose %d = %d \n", 20, 2, n_chose_k_v2(20,18));
+	
+	printf("%d choose %d = %d \n", 5, 3, n_chose_k(5,3));
+	printf("%d choose %d = %d \n", 5, 3, n_chose_k_v2(5,3));
 	// testGetCombinations();
 
     printf("-------- Program Start --------\n");
@@ -48,7 +54,7 @@ int main() {
 
     std::vector<long> childvector(encryptor.getEncryptedArray()->size()), parentvector(encryptor.getEncryptedArray()->size());
     long nslots = encryptor.getEncryptedArray()->size();
-    
+
     //Sender ( = Parent) vector only has even numbers 0-18
     //Reveiver ( = Child) vector has all numbers 0-9
     int parentSize = 10;
@@ -101,7 +107,7 @@ int main() {
     clock_t stop = std::clock();
     double baseline_duration = (double) ((stop - start) / CLOCKS_PER_SEC);
 
-    printf("Printing All Timers: \n");
+    // printf("Printing All Timers: \n");
     // helib::printAllTimers(std::cout);
     printf("\n");
     
@@ -125,9 +131,9 @@ int main() {
     start = std::clock();
     double windowed_duration = 0;
 
-    std::vector<long> senderSet = {1,2,3,4,5,6,7,8,9,10};
+    std::vector<long> senderSet = {2,4,6,8,10,12,14,16,18,20};
     int n = senderSet.size();
-    std::vector<long> receiverSet = {2,4,6,8,10,12,14,16,18,20};
+    std::vector<long> receiverSet = {1,2,3,4,5,6,7,8,9,10};
     int x_n = receiverSet.size();
 
     std::vector<long> senderOptCoeff = getSenderOptCoeffs(n, senderSet);
@@ -144,7 +150,7 @@ int main() {
     }
 
     printf("\n");
-    printf("\t Optimized Coeff All: ");
+    // printf("\t Optimized Coeff All: ");
     std::vector<long> optCoeff(nslots);
     for(int i=0; i<=nslots; i++){
         if(i<(2*n+1)*x_n){
@@ -153,7 +159,7 @@ int main() {
         else{
             optCoeff[i] = 0;
         }
-        printf("%ld ", optCoeff[i]);
+        // printf("%ld ", optCoeff[i]);
     }
 
     // printf("\n");
@@ -192,11 +198,11 @@ int main() {
     stop = std::clock();
     windowed_duration = windowed_duration + (double)((stop-start)/CLOCKS_PER_SEC);
 
-    printf("Expanded Receiver data: ");
-    for(int i=0; i<nslots; i++){
-    	printf("%ld ",  receiverDataExpanded[i]);
-    }
-    printf("\n");
+    // printf("Expanded Receiver data: ");
+    // for(int i=0; i<nslots; i++){
+    // 	printf("%ld ",  receiverDataExpanded[i]);
+    // }
+    // printf("\n");
 
     // start = std::clock();
     helib::Ctxt result = PSI::windowedPSI(receiverDataExp_Ctxt, senderOptCoeff_Ctxt, n+1, encryptor);
@@ -306,10 +312,31 @@ int n_chose_k(int n, int k){
     return result;
 }
 
+int n_chose_k_v2(int n, int k)
+{
+	int numerator = 1;
+    int factorial_n_minus_k = 1;
+    for(int i=n; i>k; i--){
+        numerator = numerator * i;
+    }
+    // printf("Factorial of %d = %d\n", n, factorial_n);
+
+    // printf("Factorial of %d = %d\n", k, factorial_k);
+
+    for(int i=1; i<=(n-k) ; i++){
+        factorial_n_minus_k = factorial_n_minus_k*i;
+    }
+
+    // printf("Factorial of (%d-%d) = factorial of %d = %d\n", n, k, n-k, factorial_n_minus_k);
+
+    int result = (int)(numerator/(factorial_n_minus_k));
+    // printf("Result  of %d chose %d = %d\n", n, k, result);
+    return result;
+}
 void testGetCombinations(){
     int n = 4;
     int k = 2;
-    int t = n_chose_k(n, k);
+    int t = n_chose_k_v2(n, k);
     std::vector<std::vector<int>> all_combo = getCombinations(n,k,t);
 
     printf("Result of get Combos:\n");
@@ -335,7 +362,7 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff){
         }
         else{
             sum = 0;
-            int t = n_chose_k(n,k);
+            int t = n_chose_k_v2(n,k);
             // printf("\tk=%d, n=%d, t=%d, ", k, n, t);
             all_combo = getCombinations(n,k,t);
             for(int i=0; i<t; i++){
