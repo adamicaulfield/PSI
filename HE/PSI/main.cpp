@@ -26,6 +26,8 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff);
     Task 1 requires two user integer inputs
 */
 int main() {
+	// testGetCombinations();
+
     printf("-------- Program Start --------\n");
 
     unsigned long plaintext_prime_modulus = 53;
@@ -46,15 +48,11 @@ int main() {
 
     std::vector<long> childvector(encryptor.getEncryptedArray()->size()), parentvector(encryptor.getEncryptedArray()->size());
     long nslots = encryptor.getEncryptedArray()->size();
-
-    // long one_num = 5;
-    // helib::Ctxt one_num_ctxt(*encryptor.getPublicKey());
-    // encryptor.getEncryptedArray()->encrypt(one_num_ctxt,*encryptor.getPublicKey(),one_num);
-
-    //Parent vector only has even numbers 0-18
-    //Child vector has all numbers 0-9
-    int parentSize = 4;
-    int childSize = 4;
+    
+    //Sender ( = Parent) vector only has even numbers 0-18
+    //Reveiver ( = Child) vector has all numbers 0-9
+    int parentSize = 10;
+    int childSize = 10;
 
     printf("Filling Vectors...");
     for(int i=0; i<nslots; i++){
@@ -124,59 +122,88 @@ int main() {
 
     printf("--------------- Optimization 3: Windowed PSI -------------------\n");
 
-    // std::vector<std::vector<int>> combinations = getCombinations(5,3);
     start = std::clock();
-    std::vector<long> senderSet = {1,3};
+    double windowed_duration = 0;
+
+    std::vector<long> senderSet = {1,2,3,4,5,6,7,8,9,10};
     int n = senderSet.size();
+    std::vector<long> receiverSet = {2,4,6,8,10,12,14,16,18,20};
+    int x_n = receiverSet.size();
+
     std::vector<long> senderOptCoeff = getSenderOptCoeffs(n, senderSet);
+
+   	for(int i=0; i<n; i++){
+   		senderOptCoeff.push_back(0);
+   	}
+
+    // n = senderOptCoeff.size();
+
     printf("\t Sender Optimized Coeff: ");
-    for(int i=0; i<=n; i++){
+    for(int i=0; i<2*n+1; i++){
         printf("%ld ", senderOptCoeff[i]);
     }
-    printf("\n");
 
+    printf("\n");
+    printf("\t Optimized Coeff All: ");
     std::vector<long> optCoeff(nslots);
-    for(int i=0; i<=n; i++){
-        if(i<=n){
-            optCoeff[i] = senderOptCoeff[i];
+    for(int i=0; i<=nslots; i++){
+        if(i<(2*n+1)*x_n){
+            optCoeff[i] = senderOptCoeff[i%(2*n+1)];
         }
         else{
             optCoeff[i] = 0;
         }
+        printf("%ld ", optCoeff[i]);
     }
+
+    // printf("\n");
 
     printf("Encrypting Sender Optimized Coeffs...");
     helib::Ctxt senderOptCoeff_Ctxt(*encryptor.getPublicKey());
     encryptor.getEncryptedArray()->encrypt(senderOptCoeff_Ctxt, *encryptor.getPublicKey(), optCoeff);
     printf("Done\n");
 
-    std::vector<long> receiverSet = {1, 2, 3, 4};
-    int x_n = receiverSet.size();
     printf("Setup ReceiverSet\n");
     std::vector<long> receiverDataExpanded(nslots);
-    printf("Initialized vector for expanded receiver data\n");
-
+    // start = std::clock();
     helib::Ctxt receiverDataExp_Ctxt(*encryptor.getPublicKey());
     for(int x = 0; x<x_n; x++){
-        // printf("Expanded data for %d: ", x);
-        for(int i=n; i>=0; i--){
-            receiverDataExpanded[n-i] = (long) pow(receiverSet[x],i);
-            // printf("Passed for i=%d\n", i);
-        }
-        for(int i=n+1; i<nslots; i++){
-            receiverDataExpanded[i] = 0;
-        }
-        encryptor.getEncryptedArray()->encrypt(receiverDataExp_Ctxt, *encryptor.getPublicKey(), receiverDataExpanded);        
-    
-        helib::Ctxt result = PSI::windowedPSI(receiverDataExp_Ctxt, senderOptCoeff_Ctxt, n+1, encryptor);
-        PSI::inspectResults(receiverSet[x], result, encryptor);
-        // for(int i=0; i<n+1; i++){
-        //     printf("%d ", receiverDataExpanded[i]);
-        // }
-        // printf("\n");    
+    	std::vector<long> tmp;
+    	for(int i = 0; i<=n; i++){
+    		// if(i<(n+1)*x_n){
+    		tmp.push_back((long) pow(receiverSet[x],n-i));
+    		// }
+    	}
+    	for(int i=0; i<n; i++){
+    		tmp.push_back(0);
+    	}
+
+    	for(int i=0; i<2*n+1; i++){
+    		if(i<=(n+1)*x_n){
+    			receiverDataExpanded[x*(2*n+1)+i] = tmp[i];
+    		}
+    		else{
+    			receiverDataExpanded[x*(2*n+1)+i] = 0;
+    		}
+    	}
     }
+    encryptor.getEncryptedArray()->encrypt(receiverDataExp_Ctxt, *encryptor.getPublicKey(), receiverDataExpanded);        
+    
     stop = std::clock();
-    double windowed_duration = (double) ((stop - start) / CLOCKS_PER_SEC);
+    windowed_duration = windowed_duration + (double)((stop-start)/CLOCKS_PER_SEC);
+
+    printf("Expanded Receiver data: ");
+    for(int i=0; i<nslots; i++){
+    	printf("%ld ",  receiverDataExpanded[i]);
+    }
+    printf("\n");
+
+    // start = std::clock();
+    helib::Ctxt result = PSI::windowedPSI(receiverDataExp_Ctxt, senderOptCoeff_Ctxt, n+1, encryptor);
+    PSI::inspectResultsWindowed(receiverSet, result, x_n, n, encryptor);
+
+    stop = std::clock();
+    windowed_duration = windowed_duration + 2*((double)((stop - start) / CLOCKS_PER_SEC));
 
     printf("--------------- Timing Comparison -------------------\n");
     printf("\tBaseline: %f\n", baseline_duration);
@@ -197,7 +224,7 @@ std::vector<std::vector<int>> getCombinations(int n, int k, int t){
 
     for(int i=0; i<k; i++){
         elt[i] = i;
-        max_val[i] = k-1+i;
+        max_val[i] = n-(k-i);
     }
 
     int count = 0;
@@ -206,9 +233,9 @@ std::vector<std::vector<int>> getCombinations(int n, int k, int t){
     while(count<t){
         check_ind = k-1;
         checking = true;
-        // for(int i=0; i<k; i++){
-        //     printf("%d ", elt[i]);
-        // }
+        for(int i=0; i<k; i++){
+            // printf("%d ", elt[i]);
+        }
         // printf("\n");
 
         for(int i=0; i<k; i++){
@@ -280,8 +307,8 @@ int n_chose_k(int n, int k){
 }
 
 void testGetCombinations(){
-    int n = 5;
-    int k = 3;
+    int n = 4;
+    int k = 2;
     int t = n_chose_k(n, k);
     std::vector<std::vector<int>> all_combo = getCombinations(n,k,t);
 
@@ -302,6 +329,7 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff){
     std::vector<std::vector<int>> all_combo;
 
     for(int k=n; k>=0; k--){
+    	printf("%d\n",k);
         if(k==0){
             sum = 1;
         }
@@ -310,13 +338,24 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff){
             int t = n_chose_k(n,k);
             // printf("\tk=%d, n=%d, t=%d, ", k, n, t);
             all_combo = getCombinations(n,k,t);
+            for(int i=0; i<t; i++){
+            	// printf("%d: ",i);
+            	for(int j=0; j<k; j++){
+            		// printf("%d ", all_combo[i][j]);
+            	}
+            	// printf("\n");
+            }
             // printf("\tgot all combinaitons\n");
             for(int i=0; i<t; i++){
                 prod = 1;
                 for(int j=0; j<k; j++){
-                    prod = prod*(-1)*senderCoeff[all_combo[i][j]]; //negative because subtracting
+                	if(all_combo[i][j]<senderCoeff.size()){
+                    	prod = prod*(-1)*senderCoeff[all_combo[i][j]]; //negative because subtracting
+                	}
                 }
+                // printf("\t%ld + %ld = ", sum, prod);
                 sum = sum+prod;
+                // printf("\t%ld\n", sum);
             }
         }
         // printf("\tCompleted sum: optCoef[%d] = %d\n",k, sum);

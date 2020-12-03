@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/ac7717/Documents/PSI/deps/bin/PSI"
-  "/home/ac7717/Documents/PSI/deps/bin/PSI.pdb"
+  "/mnt/c/Users/adamc/Documents/RIT/CSCI759/PSI/deps/bin/PSI"
+  "/mnt/c/Users/adamc/Documents/RIT/CSCI759/PSI/deps/bin/PSI.pdb"
   "CMakeFiles/PSI.dir/BasicExamples.cpp.o"
   "CMakeFiles/PSI.dir/Encryptor.cpp.o"
   "CMakeFiles/PSI.dir/FileSystem.cpp.o"
