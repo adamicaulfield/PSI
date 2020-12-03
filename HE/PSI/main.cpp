@@ -27,11 +27,11 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff);
     Task 1 requires two user integer inputs
 */
 int main() {
-	printf("%d choose %d = %d \n", 20, 2, n_chose_k(20,18));
-	printf("%d choose %d = %d \n", 20, 2, n_chose_k_v2(20,18));
+	// printf("%d choose %d = %d \n", 20, 2, n_chose_k(20,18));
+	// printf("%d choose %d = %d \n", 20, 2, n_chose_k_v2(20,18));
 	
-	printf("%d choose %d = %d \n", 5, 3, n_chose_k(5,3));
-	printf("%d choose %d = %d \n", 5, 3, n_chose_k_v2(5,3));
+	// printf("%d choose %d = %d \n", 5, 3, n_chose_k(5,3));
+	// printf("%d choose %d = %d \n", 5, 3, n_chose_k_v2(5,3));
 	// testGetCombinations();
 
     printf("-------- Program Start --------\n");
@@ -221,7 +221,7 @@ int main() {
 }
 
 std::vector<std::vector<int>> getCombinations(int n, int k, int t){
-    printf("Start getting Combinations\n");
+    // printf("Start getting Combinations\n");
 
     std::vector<int> elt(k);
     std::vector<int> max_val(k);
@@ -283,7 +283,7 @@ std::vector<std::vector<int>> getCombinations(int n, int k, int t){
         count++;
         
     }
-    printf("Done getting Combinations\n");
+    // printf("Done getting Combinations\n");
     return all_combo;
 }
 
@@ -356,7 +356,7 @@ std::vector<long> getSenderOptCoeffs(int n, std::vector<long> senderCoeff){
     std::vector<std::vector<int>> all_combo;
 
     for(int k=n; k>=0; k--){
-    	printf("%d\n",k);
+    	// printf("%d\n",k);
         if(k==0){
             sum = 1;
         }
